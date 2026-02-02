@@ -1,67 +1,67 @@
-name: Bug Report
-description: You think something is broken
-title: "[Bug]: "
+name: 错误报告
+description: 你认为某个功能出现了问题
+title: "[错误]: "
 labels: ["bug", "triage"]
 
 body:
   - type: markdown
     attributes:
       value: |
-        > The title of the bug report should be short and descriptive.
-        > Use relevant keywords for searchability.
-        > Do not leave it blank, but also do not put an entire error log in it.
+        > 错误报告的标题应简短明了。
+        > 使用相关关键词以提高可搜索性。
+        > 不要留空，但也不要在标题中放入完整的错误日志。
   - type: checkboxes
     attributes:
-      label: Checklist
+      label: 检查清单
       description: |
-        Please perform basic debugging to see if your configuration is the cause of the issue.
-        Basic debug procedure
-        　1. Update - sometimes things just need to be updated
-        　2. Backup and revert your .env adjustments - check if the issue is caused by bad configuration
-        　3. Try a fresh installation in a different directory - see if a clean installation solves the issue
-        Before making a issue report please, check that the issue hasn't been reported recently.
+        请执行基本的调试，查看是否是你的配置导致了问题。
+        基本调试步骤：
+        　1. 更新 - 有时问题只需更新即可解决
+        　2. 备份并还原你的 .env 调整 - 检查问题是否由错误配置引起
+        　3. 在不同目录尝试全新安装 - 查看干净安装是否能解决问题
+        在提交错误报告之前，请检查该问题是否最近已被报告过。
       options:
-        - label: The issue exists on a clean installation
-        - label: The issue exists in the current version
-        - label: The issue has not been reported before
-        - label: The issue has been reported before but has not been fixed yet
+        - label: 该问题在全新安装时存在
+        - label: 该问题在当前版本中存在
+        - label: 该问题之前未被报告过
+        - label: 该问题之前已被报告但尚未修复
   - type: markdown
     attributes:
       value: |
-        > Please fill this form with as much information as possible. Don't forget to add information about "Which OS" and provide screenshots if possible
+        > 请尽可能详细地填写此表单。不要忘记添加"操作系统"信息，并在可能的情况下提供截图
   - type: textarea
     id: what-did
     attributes:
-      label: What happened?
-      description: Tell us what happened in a very clear and simple way
+      label: 发生了什么？
+      description: 请以清晰简洁的方式告诉我们发生了什么
       placeholder: |
-        application crashes on bootup.
+        应用程序在启动时崩溃。
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Steps to reproduce the problem
-      description: Please provide us with precise step by step instructions on how to reproduce the bug
+      label: 重现问题的步骤
+      description: 请提供详细的逐步说明，说明如何重现该错误
       placeholder: |
-        1. Go to ...
-        2. Press ...
+        1. 前往 ...
+        2. 按下 ...
         3. ...
     validations:
       required: true
   - type: textarea
     id: what-should
     attributes:
-      label: What should have happened?
-      description: Tell us what you think the normal behavior should be
+      label: 应该发生什么？
+      description: 告诉我们你认为正常行为应该是什么
       placeholder: |
-        It should have ...
+        它应该 ...
     validations:
       required: true
   - type: dropdown
     id: browsers
     attributes:
-      label: What browsers do you use to access the dashboard?
+      label: 你使用什么浏览器访问仪表板？
       multiple: true
       options:
         - Mozilla Firefox
@@ -75,31 +75,31 @@ body:
   - type: dropdown
     id: hosting
     attributes:
-      label: Where are you running the app?
+      label: 你在哪里运行应用程序？
       multiple: false
       options:
-        - Locally
-        - Locally with virtualization (e.g. Docker)
-        - Cloud (e.g. AWS, GCP, Azure)
+        - 本地
+        - 使用虚拟化在本地运行（例如 Docker）
+        - 云服务（例如 AWS, GCP, Azure）
   - type: input
     id: operating-system
     attributes:
-      label: What operating system are you using?
+      label: 你使用什么操作系统？
       placeholder: |
         Windows 11 / MacOS 15.3.2
   - type: textarea
     id: logs
     attributes:
-      label: Console logs
-      description: Please provide **full** cmd/terminal logs from the moment you started UI to the end of it, after the bug occurred. If it's very long, provide a link to pastebin or similar service.
+      label: 控制台日志
+      description: 请提供从启动 UI 到错误发生后的完整命令行/终端日志。如果很长，请提供 pastebin 或类似服务的链接。
       render: Shell
     validations:
       required: true
   - type: textarea
     id: misc
     attributes:
-      label: Additional information
+      label: 附加信息
       description: | 
-        Please provide us with any relevant additional info or context.
-        Examples:
-        　I have updated packages recently.
+        请向我们提供任何相关的附加信息或上下文。
+        示例：
+        　我最近更新了软件包。

@@ -1,40 +1,40 @@
-name: Feature request
-description: Suggest an idea for this project
-title: "[Feature Request]: "
+name: 功能请求
+description: 为这个项目提出一个想法
+title: "[功能请求]: "
 labels: ["enhancement", "triage"]
 
 body:
   - type: checkboxes
     attributes:
-      label: Is there an existing issue for this?
-      description: Please search to see if an issue already exists for the feature you want, and that it's not implemented in a recent build/commit.
+      label: 是否已有相关问题？
+      description: 请搜索是否已经存在关于你想要的功能的问题，以及它是否在最近的构建/提交中未实现。
       options:
-        - label: I have searched the existing issues and checked the recent builds/commits
+        - label: 我已经搜索了现有问题并检查了最近的构建/提交
           required: true
   - type: markdown
     attributes:
       value: |
-        *Please fill this form with as much information as possible, provide screenshots and/or illustrations of the feature if possible*
+        *请尽可能详细地填写此表单，如果可能，请提供功能的截图和/或插图*
   - type: textarea
     id: feature
     attributes:
-      label: What would your feature do?
-      description: Tell us about your feature in a very clear and simple way, and what problem it would solve
+      label: 你的功能会做什么？
+      description: 请以清晰简洁的方式告诉我们你的功能，以及它将解决什么问题
     validations:
       required: true
   - type: textarea
     id: workflow
     attributes:
-      label: Proposed workflow
-      description: Please provide us with step by step information on how you'd like the feature to be accessed and used
+      label: 建议的工作流程
+      description: 请提供关于你希望如何访问和使用该功能的逐步信息
       value: |
-        1. Go to .... 
-        2. Press ....
+        1. 前往 .... 
+        2. 按下 ....
         3. ...
     validations:
       required: true
   - type: textarea
     id: misc
     attributes:
-      label: Additional information
-      description: Add any other context or screenshots about the feature request here.
+      label: 附加信息
+      description: 在此处添加关于功能请求的任何其他上下文或截图。
