@@ -867,6 +867,35 @@ class PushHandler:
             logger.debug(traceback.format_exc())
             return None
 
+    def _get_label_id(self, label_name: str) -> int:
+        """
+        通过标签名称获取标签 ID
+        :param label_name: 标签名称
+        :return: 标签 ID，如果不存在返回 None
+        """
+        if not self.repo_full_name:
+            return None
+        
+        url = urljoin(f"{self.gitea_url}/", 
+                      f"api/v1/repos/{self.repo_full_name}/labels")
+        
+        headers = {
+            'Authorization': f'token {self.gitea_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        try:
+            response = requests.get(url, headers=headers, verify=False, timeout=30)
+            if response.status_code == 200:
+                labels = response.json()
+                for label in labels:
+                    if label.get('name') == label_name:
+                        return label.get('id')
+            return None
+        except Exception as e:
+            logger.error(f"Error getting label ID: {str(e)}")
+            return None
+
     def _create_issue(self, title: str, body: str) -> int:
         """
         创建新 Issue
@@ -894,7 +923,29 @@ class PushHandler:
         issue_labels = os.getenv('GITEA_REVIEW_ISSUE_LABELS', '')
         if issue_labels:
             labels = [label.strip() for label in issue_labels.split(',')]
-            data['labels'] = labels
+            # 过滤空标签
+            labels = [label for label in labels if label]
+            if labels:
+                # 尝试将标签转换为整数（ID），如果失败则跳过
+                try:
+                    # 尝试获取标签 ID
+                    label_ids = []
+                    for label in labels:
+                        # 检查是否为数字
+                        if label.isdigit():
+                            label_ids.append(int(label))
+                        else:
+                            # 如果是字符串，尝试通过名称获取 ID
+                            label_id = self._get_label_id(label)
+                            if label_id:
+                                label_ids.append(label_id)
+                    
+                    if label_ids:
+                        data['labels'] = label_ids
+                except Exception as e:
+                    logger.error(f"Error processing labels: {str(e)}")
+                    # 如果处理标签失败，跳过添加标签
+                    pass
         
         try:
             response = requests.post(url, headers=headers, json=data, verify=False, timeout=30)
