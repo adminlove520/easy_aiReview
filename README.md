@@ -155,7 +155,7 @@ GITLAB_ACCESS_TOKEN={YOUR_GITLAB_ACCESS_TOKEN}
 **2. 启动服务**
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 **3. 验证部署**
@@ -172,7 +172,7 @@ docker-compose up -d
 **1. 获取源码**
 
 ```bash
-git clone https://github.com/spherical-up/Easy-AI-CodeReview
+git clone https://github.com/adminlove520/easy_aiReview
 cd Easy-AI-CodeReview
 ```
 
