@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    ports:
+      - "5001:5001"
+      - "5002:5002"
+    volumes:
+      - ./data:/app/data
+      - ./log:/app/log
+      - ./config/prompt_templates.yml:/app/config/prompt_templates.yml
+    env_file:
+      - ./config/.env
+    restart: unless-stopped

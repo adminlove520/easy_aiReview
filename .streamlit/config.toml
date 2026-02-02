@@ -1,0 +1,18 @@
+[theme]
+# 主题颜色配置
+primaryColor = "#1f77b4"      # 主色调（按钮、链接等）
+backgroundColor = "#ffffff"   # 背景色
+secondaryBackgroundColor = "#f0f2f6"  # 次要背景色
+textColor = "#262730"         # 文本颜色
+font = "sans serif"           # 字体类型
+
+[server]
+# 服务器配置
+headless = true               # 无头模式
+port = 5002                   # 端口号
+address = "0.0.0.0"          # 监听地址
+
+[browser]
+# 浏览器配置
+gatherUsageStats = false      # 禁用使用统计
+

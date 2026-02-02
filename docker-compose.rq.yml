@@ -1,0 +1,62 @@
+# 这个是使用了Redis Queue的版本
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    ports:
+      - "5001:5001"
+      - "5002:5002"
+    volumes:
+      - data:/app/data
+      - log:/app/logs
+    env_file:
+      - ./config/.env
+    depends_on:
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    volumes_from:
+      - app
+    env_file:
+      - ./config/.env
+    # environment:
+    #   - WORKER_QUEUE=git_test_com
+    depends_on:
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+#  worker2:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      target: worker
+#    volumes_from:
+#      - app
+#    env_file:
+#      - .env
+#    environment:
+#      - WORKER_QUEUE=git_test2_com
+#    depends_on:
+#      redis:
+#        condition: service_started
+#    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  data:
+  log:
+  redis_data:

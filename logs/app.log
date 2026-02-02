@@ -1,0 +1,67 @@
+2025-06-19 15:10:13,961 - INFO - config_checker.py:check_config:69 - 开始检查配置项...
+2025-06-19 15:10:13,961 - INFO - config_checker.py:check_env_vars:36 - 所有必要的环境变量均已设置。
+2025-06-19 15:10:13,962 - INFO - config_checker.py:check_llm_provider:57 - LLM 供应商 deepseek 的配置项已设置。
+2025-06-19 15:10:13,991 - INFO - config_checker.py:check_llm_connectivity:61 - 正在检查 LLM 供应商的连接...
+2025-06-19 15:10:13,992 - DEBUG - deepseek.py:completions:27 - Sending request to DeepSeek API. Model: deepseek-chat, Messages: [{'role': 'user', 'content': '请仅返回 "ok"。'}]
+2025-06-19 15:10:16,703 - INFO - config_checker.py:check_llm_connectivity:63 - LLM 可以连接成功。
+2025-06-19 15:10:16,705 - INFO - config_checker.py:check_config:73 - 配置项检查完成。
+2025-06-19 15:10:16,709 - INFO - api.py:setup_scheduler:98 - Scheduler started successfully.
+2025-06-19 15:15:03,559 - INFO - config_checker.py:check_config:69 - 开始检查配置项...
+2025-06-19 15:15:03,559 - INFO - config_checker.py:check_env_vars:36 - 所有必要的环境变量均已设置。
+2025-06-19 15:15:03,560 - INFO - config_checker.py:check_llm_provider:57 - LLM 供应商 deepseek 的配置项已设置。
+2025-06-19 15:15:03,575 - INFO - config_checker.py:check_llm_connectivity:61 - 正在检查 LLM 供应商的连接...
+2025-06-19 15:15:03,575 - DEBUG - deepseek.py:completions:27 - Sending request to DeepSeek API. Model: deepseek-chat, Messages: [{'role': 'user', 'content': '请仅返回 "ok"。'}]
+2025-06-19 15:15:06,492 - INFO - config_checker.py:check_llm_connectivity:63 - LLM 可以连接成功。
+2025-06-19 15:15:06,493 - INFO - config_checker.py:check_config:73 - 配置项检查完成。
+2025-06-19 15:15:06,498 - INFO - api.py:setup_scheduler:98 - Scheduler started successfully.
+2025-06-19 15:53:36,728 - INFO - config_checker.py:check_config:69 - 开始检查配置项...
+2025-06-19 15:53:36,729 - INFO - config_checker.py:check_env_vars:36 - 所有必要的环境变量均已设置。
+2025-06-19 15:53:36,730 - INFO - config_checker.py:check_llm_provider:57 - LLM 供应商 deepseek 的配置项已设置。
+2025-06-19 15:53:36,742 - INFO - config_checker.py:check_llm_connectivity:61 - 正在检查 LLM 供应商的连接...
+2025-06-19 15:53:36,743 - DEBUG - deepseek.py:completions:27 - Sending request to DeepSeek API. Model: deepseek-chat, Messages: [{'role': 'user', 'content': '请仅返回 "ok"。'}]
+2025-06-19 15:53:39,578 - INFO - config_checker.py:check_llm_connectivity:63 - LLM 可以连接成功。
+2025-06-19 15:53:39,580 - INFO - config_checker.py:check_config:73 - 配置项检查完成。
+2025-06-19 15:53:39,584 - INFO - api.py:setup_scheduler:98 - Scheduler started successfully.
+2025-06-19 15:55:32,390 - INFO - config_checker.py:check_config:69 - 开始检查配置项...
+2025-06-19 15:55:32,390 - INFO - config_checker.py:check_env_vars:36 - 所有必要的环境变量均已设置。
+2025-06-19 15:55:32,390 - INFO - config_checker.py:check_llm_provider:57 - LLM 供应商 deepseek 的配置项已设置。
+2025-06-19 15:55:32,403 - INFO - config_checker.py:check_llm_connectivity:61 - 正在检查 LLM 供应商的连接...
+2025-06-19 15:55:32,404 - DEBUG - deepseek.py:completions:27 - Sending request to DeepSeek API. Model: deepseek-chat, Messages: [{'role': 'user', 'content': '请仅返回 "ok"。'}]
+2025-06-19 15:55:35,395 - INFO - config_checker.py:check_llm_connectivity:63 - LLM 可以连接成功。
+2025-06-19 15:55:35,396 - INFO - config_checker.py:check_config:73 - 配置项检查完成。
+2025-06-19 15:55:35,402 - INFO - api.py:setup_scheduler:98 - Scheduler started successfully.
+2025-06-19 18:00:01,019 - INFO - api.py:daily_report:54 - No data to process.
+2025-06-19 18:00:01,021 - ERROR - log.py:error:15 - ❌ Failed to generate daily report: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-06-20 18:00:00,635 - INFO - api.py:daily_report:54 - No data to process.
+2025-06-20 18:00:00,658 - ERROR - log.py:error:15 - ❌ Failed to generate daily report: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2026-01-08 15:36:39,880 - INFO - config_checker.py:check_config:69 - 开始检查配置项...
+2026-01-08 15:36:39,881 - INFO - config_checker.py:check_env_vars:36 - 所有必要的环境变量均已设置。
+2026-01-08 15:36:39,881 - INFO - config_checker.py:check_llm_provider:57 - LLM 供应商 qwen 的配置项已设置。
+2026-01-08 15:36:39,894 - INFO - config_checker.py:check_llm_connectivity:61 - 正在检查 LLM 供应商的连接...
+2026-01-08 15:36:40,399 - INFO - config_checker.py:check_llm_connectivity:63 - LLM 可以连接成功。
+2026-01-08 15:36:40,400 - INFO - config_checker.py:check_config:73 - 配置项检查完成。
+2026-01-08 15:36:40,402 - INFO - api.py:setup_scheduler:98 - Scheduler started successfully.
+2026-01-08 18:00:00,410 - INFO - api.py:daily_report:54 - No data to process.
+2026-01-08 18:00:00,419 - ERROR - log.py:error:15 - ❌ Failed to generate daily report: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2026-01-08 19:54:36,425 - INFO - qwen.py:__init__:32 - QwenClient initialized using OpenAI SDK compatible mode (dashscope package not required)
+2026-01-08 20:43:07,026 - DEBUG - deepseek.py:completions:28 - Sending request to DeepSeek API. Model: deepseek-chat, Messages: [{'role': 'user', 'content': '请用一句话回答：1+1等于几？'}]
+2026-01-09 11:11:34,016 - INFO - config_checker.py:check_config:69 - 开始检查配置项...
+2026-01-09 11:11:34,016 - INFO - config_checker.py:check_env_vars:36 - 所有必要的环境变量均已设置。
+2026-01-09 11:11:34,016 - INFO - config_checker.py:check_llm_provider:57 - LLM 供应商 deepseek 的配置项已设置。
+2026-01-09 11:11:34,034 - INFO - config_checker.py:check_llm_connectivity:61 - 正在检查 LLM 供应商的连接...
+2026-01-09 11:11:34,034 - DEBUG - deepseek.py:completions:27 - Sending request to DeepSeek API. Model: deepseek-chat, Messages: [{'role': 'user', 'content': '请仅返回 "ok"。'}]
+2026-01-09 11:11:35,303 - INFO - config_checker.py:check_llm_connectivity:63 - LLM 可以连接成功。
+2026-01-09 11:11:35,304 - INFO - config_checker.py:check_config:73 - 配置项检查完成。
+2026-01-09 11:11:35,308 - INFO - api.py:setup_scheduler:98 - Scheduler started successfully.
