@@ -19,4 +19,4 @@ test_*.py
 .idea
 .vscode/
 #日志
-.log*
+.log

@@ -4,7 +4,9 @@ from src.llm.client.base import BaseClient
 from src.llm.client.deepseek import DeepSeekClient
 from src.llm.client.openai import OpenAIClient
 from src.llm.client.qwen import QwenClient
+from src.llm.client.zhipu import ZhipuClient
 from src.utils.log import logger
+
 
 
 class Factory:
@@ -15,6 +17,8 @@ class Factory:
             'openai': lambda: OpenAIClient(),
             'deepseek': lambda: DeepSeekClient(),
             'qwen': lambda: QwenClient(),
+            'zhipu': lambda: ZhipuClient(),
+            'zhipuai': lambda: ZhipuClient(),
         }
 
         provider_func = chat_model_providers.get(provider)
