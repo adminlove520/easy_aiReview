@@ -63,8 +63,8 @@ def handle_push_event(webhook_data: dict, gitlab_token: str, gitlab_url: str, gi
 
     except Exception as e:
         import traceback
-        error_message = f'服务出现未知错误: {str(e)}
-{traceback.format_exc()}'
+        error_message = f"""服务出现未知错误: {str(e)}
+{traceback.format_exc()}"""
         notifier.send_notification(content=error_message)
         logger.error('出现未知错误: %s', error_message)
 
