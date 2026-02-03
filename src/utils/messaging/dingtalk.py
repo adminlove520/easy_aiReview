@@ -50,6 +50,33 @@ class DingTalkNotifier:
         # 如果既未找到匹配项，也没有默认值，抛出异常
         raise ValueError(f"未找到项目 '{project_name}' 对应的钉钉Webhook URL，且未设置默认的 Webhook URL。")
 
+    def _add_signature(self, webhook_url):
+        """
+        为钉钉 Webhook URL 添加签名
+        :param webhook_url: 原始 Webhook URL
+        :return: 添加了签名的 Webhook URL
+        """
+        # 从环境变量获取钉钉签名密钥
+        secret = os.environ.get('DINGTALK_SECRET')
+        if not secret:
+            # 如果没有配置密钥，直接返回原始 URL
+            return webhook_url
+        
+        # 生成 timestamp
+        timestamp = str(int(time.time() * 1000))
+        
+        # 生成签名
+        secret_enc = secret.encode('utf-8')
+        string_to_sign = '{}\n{}'.format(timestamp, secret).encode('utf-8')
+        hmac_code = hmac.new(secret_enc, string_to_sign, digestmod=hashlib.sha256).digest()
+        sign = urllib.parse.quote_plus(base64.b64encode(hmac_code))
+        
+        # 拼接 URL
+        if '?' in webhook_url:
+            return f'{webhook_url}&timestamp={timestamp}&sign={sign}'
+        else:
+            return f'{webhook_url}?timestamp={timestamp}&sign={sign}'
+
     def send_message(self, content: str, msg_type='text', title='通知', is_at_all=False, project_name=None, url_slug = None):
         if not self.enabled:
             logger.info("钉钉推送未启用")
@@ -57,6 +84,8 @@ class DingTalkNotifier:
 
         try:
             post_url = self._get_webhook_url(project_name=project_name, url_slug=url_slug)
+            # 添加签名
+            post_url = self._add_signature(post_url)
             headers = {
                 "Content-Type": "application/json",
                 "Charset": "UTF-8"
@@ -89,4 +118,4 @@ class DingTalkNotifier:
             else:
                 logger.error(f"钉钉消息发送失败! webhook_url:{post_url},errmsg:{response_data.get('errmsg')}")
         except Exception as e:
-            logger.error(f"钉钉消息发送失败! ", e)
+            logger.error(f"钉钉消息发送失败! {e}")
