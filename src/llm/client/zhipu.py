@@ -38,4 +38,8 @@ class ZhipuClient(BaseClient):
             model=model,
             messages=messages,
         )
-        return completion.choices[0].message.content
+        if completion and completion.choices and len(completion.choices) > 0:
+            return completion.choices[0].message.content
+        else:
+            logger.error("LLM returned no response")
+            raise Exception("LLM returned no response")
