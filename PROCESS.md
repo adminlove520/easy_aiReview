@@ -1,6 +1,6 @@
 ```mermaid
 flowchart TD
-    A["🎯 GitLab"] --> B["🌐 Webhook API Call"]
+    A["🎯 GitLab|Github|Gitea"] --> B["🌐 Webhook API Call"]
     B --> C{"📂 类型判断<br/>Type = ?"}
     
     %% Merge Request 流程
