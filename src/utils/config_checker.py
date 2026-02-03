@@ -22,8 +22,8 @@ LLM_REQUIRED_KEYS = {
     "openai": ["OPENAI_API_KEY", "OPENAI_API_MODEL"],
     "deepseek": ["DEEPSEEK_API_KEY", "DEEPSEEK_API_MODEL"],
     "qwen": ["QWEN_API_KEY", "QWEN_API_MODEL"],
-    "zhipu": ["ZHIPU_API_KEY", "ZHIPU_API_MODEL"],
-    "zhipuai": ["ZHIPU_API_KEY", "ZHIPU_API_MODEL"],
+    "zhipu": ["ZHIPUAI_API_KEY", "ZHIPUAI_API_MODEL"],
+    "zhipuai": ["ZHIPUAI_API_KEY", "ZHIPUAI_API_MODEL"],
 }
 
 
