@@ -16,7 +16,7 @@ test_*.py
 .env
 
 # ide
-.trea
+.trae/*
 .idea
 .vscode/
 #日志

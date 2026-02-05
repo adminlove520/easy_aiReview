@@ -23,6 +23,7 @@ from src.utils.messaging import notifier
 from src.utils.log import logger
 from src.utils.queue import handle_queue
 from src.utils.reporter import Reporter
+from src.service.report_service import ReportService
 
 from src.utils.config_checker import check_config
 
@@ -221,6 +222,13 @@ def daily_report():
         report_txt = Reporter().generate_report(json.dumps(commits))
         # 发送钉钉通知
         notifier.send_notification(content=report_txt, msg_type="markdown", title="代码提交日报")
+
+        # 保存日报到Git仓库
+        report_service = ReportService()
+        if report_service.save_report_to_git(report_txt):
+            logger.info("日报成功保存到Git仓库")
+        else:
+            logger.error("日报保存到Git仓库失败")
 
         # 返回生成的日报内容
         return json.dumps(report_txt, ensure_ascii=False, indent=4)
