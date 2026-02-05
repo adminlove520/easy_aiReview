@@ -1,6 +1,8 @@
 import os
+import shutil
 import tempfile
 from datetime import datetime
+from typing import Optional
 
 from src.utils.git.factory import GitClientFactory
 from src.utils.log import logger
@@ -10,20 +12,25 @@ class ReportService:
     """日报存储服务"""
 
     def __init__(self):
-        self.git_service_type = os.environ.get('GIT_SERVICE_TYPE', 'gitea')
+        self.git_service_type = os.environ.get('GIT_SERVICE_TYPE', 'gitea').lower()
         self.repo_name = os.environ.get('GIT_REPO_NAME', 'aiReview_dailyReport')
         self.repo_description = '代码审查日报存储仓库'
         self.temp_dir = tempfile.gettempdir()
+        self._local_repo_path: Optional[str] = None
 
     def _get_git_credentials(self) -> dict:
         """获取Git认证信息"""
+        service_type = self.git_service_type.upper()
         credentials = {
-            'access_token': os.environ.get(f'{self.git_service_type.upper()}_ACCESS_TOKEN'),
-            'owner': os.environ.get(f'{self.git_service_type.upper()}_REPO_OWNER')
+            'access_token': os.environ.get(f'{service_type}_ACCESS_TOKEN', ''),
+            'owner': os.environ.get(f'{service_type}_REPO_OWNER', '')
         }
+        if not credentials['access_token'] or not credentials['owner']:
+            logger.error(f"Git credentials incomplete: {service_type}_ACCESS_TOKEN or {service_type}_REPO_OWNER not set")
+            return {}
 
         # 添加API URL配置
-        api_url_key = f'{self.git_service_type.upper()}_API_URL'
+        api_url_key = f'{service_type}_API_URL'
         if os.environ.get(api_url_key):
             credentials['api_url'] = os.environ.get(api_url_key)
         else:
@@ -53,10 +60,21 @@ class ReportService:
 
         return date_dir, file_path
 
+    def _cleanup_local_repo(self):
+        """清理本地仓库目录"""
+        if self._local_repo_path and os.path.exists(self._local_repo_path):
+            try:
+                shutil.rmtree(self._local_repo_path)
+                logger.info(f"清理临时目录: {self._local_repo_path}")
+            except Exception as e:
+                logger.warning(f"清理临时目录失败: {e}")
+            finally:
+                self._local_repo_path = None
+
     def _ensure_directory(self, directory: str):
         """确保目录存在"""
         if not os.path.exists(directory):
-            os.makedirs(directory)
+            os.makedirs(directory, exist_ok=True)
             logger.info(f"创建目录: {directory}")
 
     def save_report_to_git(self, report_content: str) -> bool:
@@ -68,9 +86,16 @@ class ReportService:
         Returns:
             bool: 是否保存成功
         """
+        # 获取日期路径和文件路径
+        date_dir, report_file_path = self._get_date_path()
+        date_str = date_dir
+
         try:
-            # 获取Git客户端
             credentials = self._get_git_credentials()
+            if not credentials:
+                logger.error("获取Git认证信息失败")
+                return False
+
             git_client = GitClientFactory.get_client(self.git_service_type, credentials)
             if not git_client:
                 logger.error("获取Git客户端失败")
@@ -89,73 +114,39 @@ class ReportService:
                 logger.error("获取仓库URL失败")
                 return False
 
-            # 克隆仓库到临时目录
-            local_repo_path = os.path.join(self.temp_dir, f'{self.repo_name}_{datetime.now().timestamp()}')
-            if not git_client.clone_repository(repo_url, local_repo_path):
+            # 生成唯一临时目录名并克隆
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+            self._local_repo_path = os.path.join(self.temp_dir, f'{self.repo_name}_{timestamp}')
+
+            if not git_client.clone_repository(repo_url, self._local_repo_path):
                 logger.error("克隆仓库失败")
                 return False
 
-            # 获取日期路径
-            date_dir, report_file_path = self._get_date_path()
-            full_file_path = os.path.join(local_repo_path, report_file_path)
-
-            # 确保日期目录存在
-            date_dir_full = os.path.join(local_repo_path, date_dir)
+            # 写入日报内容
+            full_file_path = os.path.join(self._local_repo_path, report_file_path)
+            date_dir_full = os.path.join(self._local_repo_path, date_dir)
             self._ensure_directory(date_dir_full)
 
-            # 写入日报内容
             with open(full_file_path, 'w', encoding='utf-8') as f:
                 f.write(report_content)
             logger.info(f"写入日报文件: {full_file_path}")
 
-            # 提交并推送代码
-            commit_message = f'更新日报 {report_file_path}'
-            if not git_client.commit_and_push(local_repo_path, commit_message):
+            # 生成 commit message，包含链接
+            link_text = f'{date_str}_开发日报'
+            commit_message = f'更新日报 {report_file_path}\n\n📄 {link_text}'
+
+            if not git_client.commit_and_push(self._local_repo_path, commit_message):
                 logger.error("提交并推送代码失败")
                 return False
 
-            logger.info("日报保存到Git仓库成功")
+            logger.info(f"日报保存到Git仓库成功: {link_text}")
             return True
 
         except Exception as e:
             logger.error(f"保存日报到Git仓库异常: {e}")
+            import traceback
+            logger.debug(traceback.format_exc())
             return False
-
-    def generate_report_content(self, commits: list) -> str:
-        """生成日报内容
-
-        Args:
-            commits: 提交记录列表
-
-        Returns:
-            str: 日报内容
-        """
-        date_str = datetime.now().strftime('%Y年%m月%d日')
-        report_content = f'# 代码审查日报 - {date_str}\n\n'
-
-        # 按作者分组
-        author_commits = {}
-        for commit in commits:
-            author = commit.get('author', 'Unknown')
-            if author not in author_commits:
-                author_commits[author] = []
-            author_commits[author].append(commit)
-
-        # 生成每个作者的提交记录
-        for author, author_commit_list in author_commits.items():
-            report_content += f'## {author}\n\n'
-            for commit in author_commit_list:
-                project = commit.get('project_name', 'Unknown')
-                branch = commit.get('branch', 'Unknown')
-                message = commit.get('commit_messages', 'No message')
-                additions = commit.get('additions', 0)
-                deletions = commit.get('deletions', 0)
-
-                report_content += f'### {project} ({branch})\n'
-                report_content += f'- 提交信息: {message}\n'
-                report_content += f'- 代码变更: +{additions} - {deletions}\n\n'
-
-        report_content += f'\n---\n'
-        report_content += f'生成时间: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
-
-        return report_content
+        finally:
+            # 确保清理临时目录
+            self._cleanup_local_repo()
