@@ -284,6 +284,10 @@ class CodeReviewer(BaseReviewer):
         :param changes_data: 原始的changes数据，用于语言检测
         :return:
         """
+        # 生成当前的审查时间
+        import datetime
+        current_time = datetime.datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')
+        
         # 保存原始的changes数据用于语言检测
         original_changes_data = changes_data
         
@@ -329,12 +333,12 @@ class CodeReviewer(BaseReviewer):
         else:
             final_language = detected_language
 
-        review_result = self.review_code(changes_text, commits_text, final_language, original_changes_data).strip()
+        review_result = self.review_code(changes_text, commits_text, final_language, original_changes_data, current_time).strip()
         if review_result.startswith("```markdown") and review_result.endswith("```"):
             return review_result[11:-3].strip()
         return review_result
 
-    def review_code(self, diffs_text: str, commits_text: str = "", pre_detected_language: str = None, changes_data: list = None) -> str:
+    def review_code(self, diffs_text: str, commits_text: str = "", pre_detected_language: str = None, changes_data: list = None, review_time: str = None) -> str:
         """Review 代码并返回结果"""
         # 智能选择提示词
         if pre_detected_language and pre_detected_language != 'default':
@@ -358,6 +362,7 @@ class CodeReviewer(BaseReviewer):
         logger.info(f"检测到的语言对应的提示词: {prompt_key}")
         logger.info(f"当前审查风格: {style}")
         logger.info(f"可用的语言提示词映射: {self.language_prompts}")
+        logger.info(f"审查时间: {review_time}")
         
         # 加载对应的提示词
         if prompt_key != "code_review_prompt":
@@ -376,13 +381,18 @@ class CodeReviewer(BaseReviewer):
         system_content = prompts["system_message"]["content"]
         logger.info(f"实际使用的system prompt前100字符: {system_content[:100]}...")
         
+        # 准备提示词变量
+        prompt_vars = {
+            'diffs_text': diffs_text,
+            'commits_text': commits_text,
+            'review_time': review_time or '未知时间'
+        }
+        
         messages = [
             prompts["system_message"],
             {
                 "role": "user",
-                "content": prompts["user_message"]["content"].format(
-                    diffs_text=diffs_text, commits_text=commits_text
-                ),
+                "content": prompts["user_message"]["content"].format(**prompt_vars),
             },
         ]
         return self.call_llm(messages)

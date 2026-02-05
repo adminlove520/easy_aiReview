@@ -142,7 +142,8 @@ code_review_prompt:
     {diffs_text}
     提交历史(commits)：
     {commits_text}
-    请按照上述要求提供详细的审查报告，包括具体的问题描述、代码示例和改进建议。重点关注代码修改对照表，确保每个问题都有明确的"修改前"和"修改后"代码对比。
+    审查时间：{review_time}
+    请按照上述要求提供详细的审查报告，包括具体的问题描述、代码示例和改进建议。重点关注代码修改对照表，确保每个问题都有明确的"修改前"和"修改后"代码对比。请在审查报告中包含当前的审查时间。
 # 新增：针对不同编程语言的专门审查提示词
 python_review_prompt:
   system_prompt: |-
@@ -274,7 +275,9 @@ python_review_prompt:
     
     提交信息：{commits_text}
     
-    请按照上述要求提供详细的Python审查报告，包括具体的问题描述、代码示例和改进建议。重点关注Python代码修改对照表，确保每个问题都有明确的"修改前"和"修改后"代码对比。
+    审查时间：{review_time}
+    
+    请按照上述要求提供详细的Python审查报告，包括具体的问题描述、代码示例和改进建议。重点关注Python代码修改对照表，确保每个问题都有明确的"修改前"和"修改后"代码对比。请在审查报告中包含当前的审查时间。
 
 javascript_review_prompt:
   system_prompt: |-
@@ -407,7 +410,9 @@ javascript_review_prompt:
     
     提交信息：{commits_text}
     
-    请按照上述要求提供详细的JavaScript/TypeScript审查报告，包括具体的问题描述、代码示例和改进建议。重点关注代码修改对照表，确保每个问题都有明确的"修改前"和"修改后"代码对比。
+    审查时间：{review_time}
+    
+    请按照上述要求提供详细的JavaScript/TypeScript审查报告，包括具体的问题描述、代码示例和改进建议。重点关注代码修改对照表，确保每个问题都有明确的"修改前"和"修改后"代码对比。请在审查报告中包含当前的审查时间。
 
 vue3_review_prompt:
   system_prompt: |-
@@ -631,7 +636,9 @@ vue3_review_prompt:
     
     提交信息：{commits_text}
     
-    请按照上述要求提供详细的Vue3审查报告，包括具体的问题描述、代码示例和改进建议。重点关注Vue3 Composition API的使用、性能优化、TypeScript集成等方面。
+    审查时间：{review_time}
+    
+    请按照上述要求提供详细的Vue3审查报告，包括具体的问题描述、代码示例和改进建议。重点关注Vue3 Composition API的使用、性能优化、TypeScript集成等方面。请在审查报告中包含当前的审查时间。
 
 java_review_prompt:
   system_prompt: |-
@@ -759,7 +766,9 @@ java_review_prompt:
     
     提交信息：{commits_text}
     
-    请按照上述要求提供详细的Java审查报告，包括具体的问题描述、代码示例和改进建议。重点关注Java代码修改对照表，确保每个问题都有明确的"修改前"和"修改后"代码对比。
+    审查时间：{review_time}
+    
+    请按照上述要求提供详细的Java审查报告，包括具体的问题描述、代码示例和改进建议。重点关注Java代码修改对照表，确保每个问题都有明确的"修改前"和"修改后"代码对比。请在审查报告中包含当前的审查时间。
 
 go_review_prompt:
   system_prompt: |-
@@ -783,6 +792,10 @@ go_review_prompt:
     {diffs_text}
     
     提交信息：{commits_text}
+    
+    审查时间：{review_time}
+    
+    请在审查报告中包含当前的审查时间。
 
 php_review_prompt:
   system_prompt: |-
@@ -806,6 +819,10 @@ php_review_prompt:
     {diffs_text}
     
     提交信息：{commits_text}
+    
+    审查时间：{review_time}
+    
+    请在审查报告中包含当前的审查时间。
 
 cpp_review_prompt:
   system_prompt: |-
@@ -829,3 +846,7 @@ cpp_review_prompt:
     {diffs_text}
     
     提交信息：{commits_text}
+    
+    审查时间：{review_time}
+    
+    请在审查报告中包含当前的审查时间。
