@@ -24,25 +24,52 @@ class MiniMaxClient(BaseClient):
     def completions(self, 
                     messages: List[Dict[str, str]], 
                     model: Union[Optional[str], NotGiven] = NOT_GIVEN,
+                    include_reasoning: bool = False,
                     ) -> str:
         model = model or self.default_model
-        completion = self.client.chat.completions.create(
-            model=model,
-            messages=messages,
-        )
+        
+        # 调用API时关闭思维链返回，减少推理内容
+        try:
+            # 构建API调用参数
+            api_params = {
+                "model": model,
+                "messages": messages,
+            }
+            
+            # 只有当明确要求包含reasoning时才传递参数
+            if include_reasoning:
+                api_params["extra_body"] = {"include_reasoning": include_reasoning}
+            
+            completion = self.client.chat.completions.create(**api_params)
+        except Exception as e:
+            # 如果参数不支持，回退到不带参数的调用
+            logger.warning(f"include_reasoning参数不被支持，回退到默认调用: {e}")
+            completion = self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+            )
+            
         if completion and completion.choices and len(completion.choices) > 0:
-            content = completion.choices[0].message.content
+            raw_content = completion.choices[0].message.content
             
-            # 处理ping请求：如果消息是"请仅返回 'ok'。"，确保返回的内容只包含"ok"
-            if messages and len(messages) > 0:
-                user_content = messages[0].get('content', '')
-                if '请仅返回 "ok"' in user_content or "请仅返回 'ok'" in user_content:
-                    # 提取"ok"部分
-                    if 'ok' in content:
-                        return 'ok'
-            
-            # 其他情况直接返回响应内容
-            return content
+            # 过滤thinking内容（如果返回的是包含thinking的字典）
+            if isinstance(raw_content, dict):
+                content = raw_content.get("content", str(raw_content))
+                thinking = raw_content.get("thinking") or raw_content.get("reasoning_details")
+                if thinking:
+                    logger.debug("已过滤模型的thinking内容")
+                return content
+            elif isinstance(raw_content, str):
+                # 处理ping请求：如果消息是"请仅返回 'ok'。"，确保返回的内容只包含"ok"
+                if messages and len(messages) > 0:
+                    user_content = messages[0].get('content', '')
+                    if '请仅返回 "ok"' in user_content or "请仅返回 'ok'" in user_content:
+                        if 'ok' in raw_content:
+                            return 'ok'
+                
+                return raw_content
+            else:
+                return str(raw_content)
         else:
             logger.error("LLM returned no response")
             raise Exception("LLM returned no response")
