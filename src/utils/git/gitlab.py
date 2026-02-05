@@ -54,6 +54,10 @@ class GitLabGitClient(BaseGitClient):
             original_cwd = os.getcwd()
             os.chdir(local_path)
 
+            # 配置 git 用户信息（Docker 容器中可能未配置）
+            subprocess.run(['git', 'config', 'user.name', 'AI Review Bot'], capture_output=True, check=False)
+            subprocess.run(['git', 'config', 'user.email', 'bot@aireview.local'], capture_output=True, check=False)
+
             # 添加所有更改
             subprocess.run(
                 ['git', 'add', '.'],

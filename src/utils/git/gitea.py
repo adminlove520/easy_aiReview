@@ -47,7 +47,12 @@ class GiteaGitClient(BaseGitClient):
         try:
             original_cwd = os.getcwd()
             os.chdir(local_path)
-            subprocess.run(['git', 'add', '.'], capture_output=True, text=True, check=False)
+            
+            # 配置 git 用户信息（Docker 容器中可能未配置）
+            subprocess.run(['git', 'config', 'user.name', 'AI Review Bot'], capture_output=True, check=False)
+            subprocess.run(['git', 'config', 'user.email', 'bot@aireview.local'], capture_output=True, check=False)
+            
+            subprocess.run(['git', 'add', '.'], capture_output=True, check=False)
             status_result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True, check=False)
             if not status_result.stdout.strip():
                 logger.info("没有更改需要提交")
@@ -139,4 +144,8 @@ class GiteaGitClient(BaseGitClient):
             return ""
         # 从api_url提取基础URL
         base_url = self.api_url.replace('/api/v1', '') if self.api_url else 'https://git.nxwysoft.com'
-        return f"{base_url}/{self.owner}/{repo_name}.git"
+        # 返回包含认证令牌的 URL，用于 clone 操作
+        if self.access_token:
+            return f"https://{self.access_token}@{base_url.replace('https://', '')}/{self.owner}/{repo_name}.git"
+        else:
+            return f"{base_url}/{self.owner}/{repo_name}.git"
