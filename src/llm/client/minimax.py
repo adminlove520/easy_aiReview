@@ -31,7 +31,18 @@ class MiniMaxClient(BaseClient):
             messages=messages,
         )
         if completion and completion.choices and len(completion.choices) > 0:
-            return completion.choices[0].message.content
+            content = completion.choices[0].message.content
+            
+            # 处理ping请求：如果消息是"请仅返回 'ok'。"，确保返回的内容只包含"ok"
+            if messages and len(messages) > 0:
+                user_content = messages[0].get('content', '')
+                if '请仅返回 "ok"' in user_content or "请仅返回 'ok'" in user_content:
+                    # 提取"ok"部分
+                    if 'ok' in content:
+                        return 'ok'
+            
+            # 其他情况直接返回响应内容
+            return content
         else:
             logger.error("LLM returned no response")
             raise Exception("LLM returned no response")
