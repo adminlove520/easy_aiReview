@@ -64,7 +64,8 @@ class LLMReviewFunc(BaseReviewFunc):
 
     def call_llm(self, messages: List[Dict[str, Any]]) -> str:
         print(f"向 AI请求, messages: {messages}")
-        review_result = self.client.completions(messages=messages)
+        # 调用时明确关闭thinking返回，避免推送钉钉时显示推理过程
+        review_result = self.client.completions(messages=messages, include_reasoning=False)
         print(f"收到 AI 返回结果: {review_result}")
         return review_result
 

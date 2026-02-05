@@ -44,7 +44,8 @@ class BaseReviewer(abc.ABC):
     def call_llm(self, messages: List[Dict[str, Any]]) -> str:
         """调用 LLM 进行代码审核"""
         logger.info(f"向 AI 发送代码 Review 请求, messages: {messages}")
-        review_result = self.client.completions(messages=messages)
+        # 调用时明确关闭thinking返回，避免推送钉钉时显示推理过程
+        review_result = self.client.completions(messages=messages, include_reasoning=False)
         logger.info(f"收到 AI 返回结果: {review_result}")
         return review_result
 
