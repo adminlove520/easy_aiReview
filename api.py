@@ -26,6 +26,7 @@ from src.utils.reporter import Reporter
 from src.service.report_service import ReportService
 
 from src.utils.config_checker import check_config
+from src.utils.config.validator import ConfigValidator
 
 api_app = Flask(__name__, static_folder='web', static_url_path='')
 
@@ -465,6 +466,15 @@ def handle_gitea_webhook(event_type, data):
 
 
 if __name__ == '__main__':
+    # 验证配置
+    logger.info("开始验证配置...")
+    git_service_type = os.environ.get('GIT_SERVICE_TYPE', 'gitea')
+    if ConfigValidator.validate():
+        logger.info(f"Git服务类型: {git_service_type} 配置验证通过")
+    else:
+        missing = ConfigValidator.get_missing_configs(git_service_type)
+        logger.warning(f"配置验证未通过，缺失项: {', '.join(missing)}")
+    
     check_config()
     # 启动定时任务调度器
     setup_scheduler()
