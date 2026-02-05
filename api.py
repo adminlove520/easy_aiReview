@@ -198,9 +198,9 @@ def get_review_stats():
 
 @api_app.route('/review/daily_report', methods=['GET'])
 def daily_report():
-    # 获取当前日期0点和23点59分59秒的时间戳
-    start_time = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
-    end_time = datetime.now().replace(hour=23, minute=59, second=59, microsecond=0).timestamp()
+    # 获取当前日期0点和23点59分59秒的时间戳（转换为整数）
+    start_time = int(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).timestamp())
+    end_time = int(datetime.now().replace(hour=23, minute=59, second=59, microsecond=0).timestamp())
 
     try:
         if push_review_enabled:

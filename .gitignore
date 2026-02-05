@@ -13,10 +13,11 @@ conf/.env
 __pycache__/
 .cursorignore
 test_*.py
+.env
 
 # ide
 .trea
 .idea
 .vscode/
 #日志
-.log
+app.log
