@@ -122,34 +122,41 @@ flowchart TD
 **1. 准备环境文件**
 
 - 克隆项目仓库：
-```aiignore
-git clone https://github.com/spherical-up/Easy-AI-CodeReview
-cd Easy-AI-CodeReview
+```bash
+git clone https://github.com/adminlove520/easy_aiReview
+cd easy_aiReview
 ```
 
 - 创建配置文件：
-```aiignore
+```bash
 cp config/.env.dist config/.env
 ```
 
-- 编辑 config/.env 文件，配置以下关键参数：
+- 编辑 `config/.env` 文件，配置以下关键参数：
 
 ```bash
-#大模型供应商配置,支持 openai , deepseek 和 qwen
+# 大模型供应商配置 (支持: openai, deepseek, qwen, zhipuai, minimax, ollama)
 LLM_PROVIDER=deepseek
 
-#DeepSeek
-DEEPSEEK_API_KEY={YOUR_DEEPSEEK_API_KEY}
+# DeepSeek API配置
+DEEPSEEK_API_KEY=your_api_key_here
+DEEPSEEK_API_BASE_URL=https://api.deepseek.com
+DEEPSEEK_API_MODEL=deepseek-chat
 
-#支持review的文件类型(未配置的文件类型不会被审查)
-SUPPORTED_EXTENSIONS=.java,.py,.php,.yml,.vue,.go,.c,.cpp,.h,.js,.css,.md,.sql
+# 支持review的文件类型
+SUPPORTED_EXTENSIONS=.c,.cc,.cpp,.css,.go,.h,.java,.js,.jsx,.ts,.tsx,.md,.php,.py,.sql,.vue,.yml
 
-#钉钉消息推送: 0不发送钉钉消息,1发送钉钉消息
-DINGTALK_ENABLED=0
-DINGTALK_WEBHOOK_URL={YOUR_WDINGTALK_WEBHOOK_URL}
+# Git服务类型 (gitea, github, gitlab)
+GIT_SERVICE_TYPE=gitea
 
-#Gitlab配置
-GITLAB_ACCESS_TOKEN={YOUR_GITLAB_ACCESS_TOKEN}
+# Gitea配置
+GITEA_ACCESS_TOKEN=your_gitea_access_token_here
+GITEA_URL=https://git.nxwysoft.com
+GITEA_REPO_OWNER=your_username
+
+# 钉钉消息推送
+DINGTALK_ENABLED=1
+DINGTALK_WEBHOOK_URL=your_dingtalk_webhook_url
 ```
 
 **2. 启动服务**
@@ -160,25 +167,25 @@ docker compose up -d
 
 **3. 验证部署**
 
-- 主服务验证：
+- API 服务验证：
   - 访问 http://your-server-ip:5001
-  - 显示 "The code review server is running." 说明服务启动成功。
+  - 显示 "The server is running." 说明服务启动成功
 - Dashboard 验证：
   - 访问 http://your-server-ip:5002
-  - 看到一个审查日志页面，说明 Dashboard 启动成功。
+  - 看到审查日志页面，说明 Dashboard 启动成功
 
-### 方案二：本地Python环境部署
+### 方案二：本地 Python 环境部署
 
 **1. 获取源码**
 
 ```bash
 git clone https://github.com/adminlove520/easy_aiReview
-cd Easy-AI-CodeReview
+cd easy_aiReview
 ```
 
 **2. 安装依赖**
 
-使用 Python 环境（建议使用虚拟环境 venv）安装项目依赖(Python 版本：3.10+):
+使用 Python 环境（建议使用虚拟环境 venv）安装项目依赖（Python 版本：3.10+）：
 
 ```bash
 pip install -r requirements.txt
@@ -186,17 +193,17 @@ pip install -r requirements.txt
 
 **3. 配置环境变量**
 
-同 Docker 部署方案中的.env 文件配置。
+同 Docker 部署方案中的 `.env` 文件配置。
 
 **4. 启动服务**
 
-- 启动API服务：
+- 启动 API 服务：
 
 ```bash
 python api.py
 ```
 
-- 启动Dashboard服务：
+- 启动 Dashboard 服务：
 
 ```bash
 python ui_server.py
@@ -358,6 +365,9 @@ chat_model_providers = {
     'openai': lambda: OpenAIClient(),        # OpenAI
     'deepseek': lambda: DeepSeekClient(),    # DeepSeek
     'qwen': lambda: QwenClient(),           # 通义千问
+    'zhipuai': lambda: ZhipuAIClient(),     # 智谱AI
+    'minimax': lambda: MiniMaxClient(),      # MiniMax
+    'ollama': lambda: OllamaClient(),       # Ollama (本地部署)
 }
 ```
 
@@ -373,6 +383,8 @@ chat_model_providers = {
 | **DeepSeek** | `DEEPSEEK_API_KEY` | `DEEPSEEK_API_BASE_URL` | `DEEPSEEK_API_MODEL` |
 | **通义千问** | `QWEN_API_KEY` | `QWEN_API_BASE_URL` | `QWEN_API_MODEL` |
 | **智谱AI** | `ZHIPUAI_API_KEY` | `ZHIPUAI_API_BASE_URL` | `ZHIPUAI_API_MODEL` |
+| **MiniMax** | `MINIMAX_API_KEY` | `MINIMAX_API_BASE_URL` | `MINIMAX_API_MODEL` |
+| **Ollama** | 无需密钥 | `OLLAMA_API_BASE_URL` | `OLLAMA_API_MODEL` |
 
 ### 代码审查提示词模板
 
@@ -543,15 +555,34 @@ DEEPSEEK_API_KEY=your_api_key_here
 DEEPSEEK_API_BASE_URL=https://api.deepseek.com
 DEEPSEEK_API_MODEL=deepseek-chat
 
+# OpenAI配置
+OPENAI_API_KEY=your_api_key_here
+OPENAI_API_BASE_URL=https://api.openai.com/v1
+OPENAI_API_MODEL=gpt-4o-mini
+
+# 通义千问配置
+QWEN_API_KEY=your_api_key_here
+QWEN_API_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+QWEN_API_MODEL=qwen-coder-plus
+
 # 智谱AI配置
 ZHIPUAI_API_KEY=your_api_key_here
 ZHIPUAI_API_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
 ZHIPUAI_API_MODEL=glm-4.7
 
+# MiniMax配置
+MINIMAX_API_KEY=your_api_key_here
+MINIMAX_API_BASE_URL=https://api.minimaxi.com/v1
+MINIMAX_API_MODEL=MiniMax-M2.1
+
+# Ollama配置 (本地部署)
+OLLAMA_API_BASE_URL=http://localhost:11434
+OLLAMA_API_MODEL=deepseek-r1:latest
+
 # 审查配置
 REVIEW_STYLE=professional
 REVIEW_MAX_TOKENS=10000
-SUPPORTED_EXTENSIONS=.java,.py,.php,.yml,.vue,.go,.c,.cpp,.h,.js,.css,.md,.sql
+SUPPORTED_EXTENSIONS=.c,.cc,.cpp,.css,.go,.h,.java,.js,.jsx,.ts,.tsx,.md,.php,.py,.sql,.vue,.yml
 
 # 功能开关
 PUSH_REVIEW_ENABLED=1
@@ -559,7 +590,7 @@ MERGE_REVIEW_ONLY_PROTECTED_BRANCHES_ENABLED=0
 
 # GitLab配置
 GITLAB_ACCESS_TOKEN=your_gitlab_token_here
-GITLAB_URL=https://your-gitlab-instance.com
+GITLAB_URL=https://gitlab.com
 
 # GitHub配置
 GITHUB_ACCESS_TOKEN=your_github_token_here
@@ -568,11 +599,17 @@ GITHUB_URL=https://api.github.com
 # Gitea配置
 GITEA_ACCESS_TOKEN=your_gitea_token_here
 GITEA_URL=https://your-gitea-instance.com
+GITEA_REPO_OWNER=your_username
 GITEA_USE_ISSUE_MODE=1  # 是否使用Issue模式存储审查结果
 
 # 消息推送配置
 DINGTALK_ENABLED=1
 DINGTALK_WEBHOOK_URL=your_dingtalk_webhook_url
+
+# 日报配置 (可选)
+REPORT_CRONTAB_EXPRESSION=0 18 * * 1-5  # 周一到周五下午6点发送日报
+GIT_SERVICE_TYPE=gitea  # Git服务类型: gitea, github, gitlab
+GIT_REPO_NAME=aiReview_dailyReport  # 日报存储仓库名称
 ```
 
 <!-- ## 其它
