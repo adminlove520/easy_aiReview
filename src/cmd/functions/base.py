@@ -55,7 +55,8 @@ class LLMReviewFunc(BaseReviewFunc):
     """
     基于LLM的Review功能的基础类，定义了一些通用的方法和属性。
     """
-    DEFAULT_REVIEW_MAX_TOKENS = 10000
+    # MiniMax-M1 上下文窗口为 100万 tokens，建议设置为 750000-800000
+    DEFAULT_REVIEW_MAX_TOKENS = 800000
 
     def __init__(self):
         self.client = Factory().getClient()

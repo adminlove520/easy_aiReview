@@ -62,7 +62,6 @@ def handle_push_event(webhook_data: dict, gitlab_token: str, gitlab_url: str, gi
         ))
 
     except Exception as e:
-        import traceback
         error_message = f"""服务出现未知错误: {str(e)}
 {traceback.format_exc()}"""
         notifier.send_notification(content=error_message)
@@ -451,7 +450,6 @@ def handle_gitea_pull_request_event(webhook_data: dict, gitea_token: str, gitea_
                 logger.info(f"Review result added to issue #{issue_number}")
             except Exception as e:
                 logger.error(f"Failed to add review to issue: {str(e)}")
-                import traceback
                 logger.debug(traceback.format_exc())
                 # 降级到 PR 评论模式
                 handler.add_pull_request_notes(f'Auto Review Result: \n{review_result}')

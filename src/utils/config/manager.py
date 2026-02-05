@@ -59,7 +59,7 @@ class ConfigManager:
         
         # 代码审查配置
         self._config['SUPPORTED_EXTENSIONS'] = os.environ.get('SUPPORTED_EXTENSIONS', '.c,.cc,.cpp,.css,.go,.h,.java,.js,.jsx,.ts,.tsx,.md,.php,.py,.sql,.vue,.yml')
-        self._config['REVIEW_MAX_TOKENS'] = os.environ.get('REVIEW_MAX_TOKENS', '10000')
+        self._config['REVIEW_MAX_TOKENS'] = os.environ.get('REVIEW_MAX_TOKENS', '800000')
         self._config['REVIEW_STYLE'] = os.environ.get('REVIEW_STYLE', 'professional')
         
         # 通知配置

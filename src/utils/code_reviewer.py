@@ -314,7 +314,8 @@ class CodeReviewer(BaseReviewer):
             logger.info(f"从changes数据中检测到的语言: {detected_language}")
         
         # 如果超长，取前REVIEW_MAX_TOKENS个token
-        review_max_tokens = int(os.getenv("REVIEW_MAX_TOKENS", 10000))
+        # MiniMax-M1 上下文窗口为 100万 tokens，建议设置为 750000-800000
+        review_max_tokens = int(os.getenv("REVIEW_MAX_TOKENS", 800000))
         
         # 计算tokens数量，如果超过REVIEW_MAX_TOKENS，截断changes_text
         tokens_count = count_tokens(changes_text)
@@ -333,13 +334,26 @@ class CodeReviewer(BaseReviewer):
         else:
             final_language = detected_language
 
-        review_result = self.review_code(changes_text, commits_text, final_language, original_changes_data, current_time).strip()
-        if review_result.startswith("```markdown") and review_result.endswith("```"):
-            return review_result[11:-3].strip()
-        return review_result
+        # 尝试审查代码，如果失败则使用降级策略
+        try:
+            review_result = self.review_code(changes_text, commits_text, final_language, original_changes_data, current_time).strip()
+            if review_result.startswith("```markdown") and review_result.endswith("```"):
+                return review_result[11:-3].strip()
+            return review_result
+        except Exception as e:
+            error_msg = str(e).lower()
+            # 检查是否是上下文长度相关的错误
+            if any(keyword in error_msg for keyword in ['context_length', 'context length', 'too many tokens', 'exceed', 'maximum', 'limit']):
+                logger.warning(f"代码审查失败（上下文超限），尝试降级策略：{e}")
+                return self._fallback_review(original_changes_data, commits_text, current_time, final_language)
+            else:
+                # 其他错误，重新抛出
+                raise
 
     def review_code(self, diffs_text: str, commits_text: str = "", pre_detected_language: str = None, changes_data: list = None, review_time: str = None) -> str:
         """Review 代码并返回结果"""
+        # review_time 在 review_and_strip_code 中已生成并传递过来，此处直接使用
+        
         # 智能选择提示词
         if pre_detected_language and pre_detected_language != 'default':
             # 使用预先检测到的语言
@@ -377,9 +391,9 @@ class CodeReviewer(BaseReviewer):
             logger.info("使用通用提示词: code_review_prompt")
             prompts = self._load_fallback_prompts(style)
         
-        # 记录实际使用的提示词内容（前100个字符）
+        # 记录实际使用的提示词内容
         system_content = prompts["system_message"]["content"]
-        logger.info(f"实际使用的system prompt前100字符: {system_content[:100]}...")
+        logger.info(f"实际使用的system prompt:\n{system_content}")
         
         # 准备提示词变量
         prompt_vars = {
@@ -396,6 +410,116 @@ class CodeReviewer(BaseReviewer):
             },
         ]
         return self.call_llm(messages)
+
+    def _fallback_review(self, changes_data: list, commits_text: str, review_time: str, language: str = None) -> str:
+        """
+        降级审查策略：当代码过长导致上下文超限时使用
+        策略：只审查修改最多的前N个文件，逐步减少直到成功
+        """
+        import math
+        
+        logger.info("执行降级审查策略...")
+        
+        if not changes_data or not isinstance(changes_data, list):
+            return "无法进行代码审查：没有可审查的代码变更"
+        
+        # 计算安全的内容限制（保留一定余量）
+        safety_margin = 0.8
+        base_max_tokens = 15000 * safety_margin
+        fallback_max_tokens = int(base_max_tokens)
+        
+        # 按修改行数排序（additions + deletions），优先审查修改最多的文件
+        def get_change_priority(change):
+            if isinstance(change, dict):
+                additions = change.get('additions', 0)
+                deletions = change.get('deletions', 0)
+                return additions + deletions
+            return 0
+        
+        sorted_changes = sorted(changes_data, key=get_change_priority, reverse=True)
+        
+        # 逐步减少文件数量进行尝试
+        max_retries = 5
+        for attempt in range(max_retries):
+            # 选择前N个修改最多的文件
+            num_files = max(1, len(sorted_changes) - attempt)
+            selected_changes = sorted_changes[:num_files]
+            
+            logger.info(f"降级策略尝试 {attempt + 1}/{max_retries}: 审查 {num_files}/{len(sorted_changes)} 个文件")
+            
+            # 转换选中的changes为diff格式
+            fallback_diff = self._convert_changes_to_diff_format(selected_changes)
+            tokens_count = count_tokens(fallback_diff)
+            
+            if tokens_count > fallback_max_tokens:
+                logger.info(f"降级策略：tokens ({tokens_count}) 仍然超出限制，继续减少文件数量")
+                continue
+            
+            try:
+                # 使用简化版提示词进行审查
+                review_result = self._simple_review(fallback_diff, commits_text, review_time, language)
+                
+                # 添加降级说明
+                if num_files < len(sorted_changes):
+                    fallback_note = f"""
+---
+⚠️ **注意**：由于代码变更过多，此审查仅包含 **{num_files}** 个修改最多的文件（共 **{len(sorted_changes)}** 个文件）。
+
+未审查的文件：
+"""
+                    for i, change in enumerate(sorted_changes[num_files:], start=num_files+1):
+                        if isinstance(change, dict):
+                            file_path = change.get('new_path', change.get('old_path', f'文件#{i}'))
+                            fallback_note += f"- {file_path}\n"
+                    
+                    review_result = review_result + fallback_note
+                
+                logger.info(f"降级审查成功：审查了 {num_files} 个文件")
+                return review_result
+                
+            except Exception as e:
+                error_msg = str(e).lower()
+                if any(keyword in error_msg for keyword in ['context_length', 'context length', 'too many tokens', 'exceed', 'maximum', 'limit']):
+                    logger.warning(f"降级策略失败（尝试 {attempt + 1}）：{e}")
+                    continue
+                else:
+                    raise
+        
+        # 所有降级策略都失败，返回错误信息
+        return f"❌ 代码审查失败：代码变更过多，即使只审查修改最多的文件也超出模型上下文限制。建议分批提交代码进行审查。\n\n**统计信息**：\n- 总文件数：{len(sorted_changes)}\n- 总修改行数：{sum(get_change_priority(c) for c in sorted_changes)}"
+
+    def _simple_review(self, diffs_text: str, commits_text: str, review_time: str, language: str = None) -> str:
+        """
+        使用简化版提示词进行快速审查（用于降级策略）
+        """
+        # 加载简化版提示词
+        style = os.getenv("REVIEW_STYLE", "professional")
+        prompt_key = self.language_prompts.get(language, 'vue3_review_prompt') if language else 'code_review_prompt'
+        
+        try:
+            prompts = self._load_language_specific_prompts(prompt_key, style)
+        except:
+            prompts = self._load_fallback_prompts(style)
+        
+        # 准备提示词变量
+        prompt_vars = {
+            'diffs_text': diffs_text,
+            'commits_text': commits_text,
+            'review_time': review_time
+        }
+        
+        messages = [
+            prompts["system_message"],
+            {
+                "role": "user",
+                "content": prompts["user_message"]["content"].format(**prompt_vars),
+            },
+        ]
+        
+        result = self.call_llm(messages)
+        if result.startswith("```markdown") and result.endswith("```"):
+            return result[11:-3].strip()
+        return result
 
     def _detect_language_from_changes(self, changes_data: list) -> str:
         """从changes数据中检测主要编程语言"""
