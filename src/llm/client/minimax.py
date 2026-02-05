@@ -8,23 +8,18 @@ from src.llm.types import NotGiven, NOT_GIVEN
 from src.utils.log import logger
 
 
-class ZhipuClient(BaseClient):
-    """Zhipu client for chat models."""
+class MiniMaxClient(BaseClient):
+    """MiniMax client for chat models."""
 
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.getenv("ZHIPUAI_API_KEY")
-        # 只使用 OpenAI API 兼容接口
-        self.api_type = "openai"
-        
-        # 设置 OpenAI 兼容接口的 baseurl
-        self.base_url = os.getenv("ZHIPUAI_API_BASE_URL", "https://open.bigmodel.cn/api/paas/v4/")
-            
+        self.api_key = api_key or os.getenv("MINIMAX_API_KEY")
+        self.base_url = os.getenv("MINIMAX_API_BASE_URL", "https://api.minimaxi.com/v1")
         if not self.api_key:
             raise ValueError("API key is required. Please provide it or set it in the environment variables.")
 
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
-        self.default_model = os.getenv("ZHIPUAI_API_MODEL", "glm-4.7")
-        logger.info(f"Zhipu client initialized with API type: {self.api_type}, base_url: {self.base_url}, model: {self.default_model}")
+        self.default_model = os.getenv("MINIMAX_API_MODEL", "MiniMax-M2.1")
+        logger.info(f"MiniMax client initialized with base_url: {self.base_url}, model: {self.default_model}")
 
     def completions(self, 
                     messages: List[Dict[str, str]], 

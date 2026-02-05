@@ -7,7 +7,7 @@
 ## 功能
 
 - 🚀 多模型灵活切换
-  - 全面兼容 **DeepSeek、OpenAI、通义千问** 想用哪个，用哪个！轻松上手，自由切换。
+  - 全面兼容 **DeepSeek、OpenAI、通义千问、智谱AI** 想用哪个，用哪个！轻松上手，自由切换。
 - 📢 消息实时送达
   - 审查结果 **一键推送** 到 **钉钉、企业微信、飞书**  及时响应，代码问题无所遁形！
 - 📅 自动生成开发日报
@@ -372,6 +372,7 @@ chat_model_providers = {
 | **OpenAI** | `OPENAI_API_KEY` | `OPENAI_API_BASE_URL` | `OPENAI_API_MODEL` |
 | **DeepSeek** | `DEEPSEEK_API_KEY` | `DEEPSEEK_API_BASE_URL` | `DEEPSEEK_API_MODEL` |
 | **通义千问** | `QWEN_API_KEY` | `QWEN_API_BASE_URL` | `QWEN_API_MODEL` |
+| **智谱AI** | `ZHIPUAI_API_KEY` | `ZHIPUAI_API_BASE_URL` | `ZHIPUAI_API_MODEL` |
 
 ### 代码审查提示词模板
 
@@ -541,6 +542,11 @@ LLM_PROVIDER=deepseek
 DEEPSEEK_API_KEY=your_api_key_here
 DEEPSEEK_API_BASE_URL=https://api.deepseek.com
 DEEPSEEK_API_MODEL=deepseek-chat
+
+# 智谱AI配置
+ZHIPUAI_API_KEY=your_api_key_here
+ZHIPUAI_API_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
+ZHIPUAI_API_MODEL=glm-4.7
 
 # 审查配置
 REVIEW_STYLE=professional

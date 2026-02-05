@@ -5,6 +5,7 @@ from src.llm.client.deepseek import DeepSeekClient
 from src.llm.client.openai import OpenAIClient
 from src.llm.client.qwen import QwenClient
 from src.llm.client.zhipu import ZhipuClient
+from src.llm.client.minimax import MiniMaxClient
 from src.utils.log import logger
 
 
@@ -19,6 +20,7 @@ class Factory:
             'qwen': lambda: QwenClient(),
             'zhipu': lambda: ZhipuClient(),
             'zhipuai': lambda: ZhipuClient(),
+            'minimax': lambda: MiniMaxClient(),
         }
 
         provider_func = chat_model_providers.get(provider)

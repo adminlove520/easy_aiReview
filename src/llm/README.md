@@ -55,30 +55,12 @@ QWEN_API_MODEL=qwen-coder-plus
 
 #### ZhipuAI 配置
 
-ZhipuAI 支持两种 API 兼容接口：
-
-##### 使用 Claude API 兼容接口（默认）
-
 ```bash
 # 大模型供应商配置
 LLM_PROVIDER=zhipu
 
 # ZhipuAI 设置
 ZHIPUAI_API_KEY=your_api_key
-ZHIPUAI_API_TYPE=claude
-ZHIPUAI_API_BASE_URL=https://open.bigmodel.cn/api/anthropic
-ZHIPUAI_API_MODEL=glm-4.7
-```
-
-##### 使用 OpenAI API 兼容接口
-
-```bash
-# 大模型供应商配置
-LLM_PROVIDER=zhipu
-
-# ZhipuAI 设置
-ZHIPUAI_API_KEY=your_api_key
-ZHIPUAI_API_TYPE=openai
 ZHIPUAI_API_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
 ZHIPUAI_API_MODEL=glm-4.7
 ```
@@ -136,7 +118,7 @@ class BaseClient:
 - **OpenAIClient**：使用 OpenAI SDK 调用 OpenAI 模型
 - **DeepSeekClient**：使用 OpenAI SDK 调用 DeepSeek 模型（API 兼容 OpenAI）
 - **QwenClient**：使用 Qwen SDK 调用 Qwen 模型
-- **ZhipuClient**：使用 OpenAI SDK 调用 ZhipuAI 模型（支持 Claude 和 OpenAI 兼容接口）
+- **ZhipuClient**：使用 OpenAI SDK 调用 ZhipuAI 模型（使用 OpenAI 兼容接口）
 
 ## 常见问题
 
@@ -168,15 +150,7 @@ except Exception as e:
     print(f"API 调用失败：{str(e)}")
 ```
 
-### 4. ZhipuAI 如何选择 API 类型？
 
-在 `.env` 文件中设置 `ZHIPUAI_API_TYPE` 环境变量：
-
-```bash
-ZHIPUAI_API_TYPE=claude  # 使用 Claude API 兼容接口（默认）
-# 或
-ZHIPUAI_API_TYPE=openai  # 使用 OpenAI API 兼容接口
-```
 
 ## 代码示例
 
