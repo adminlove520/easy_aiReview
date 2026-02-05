@@ -65,3 +65,4 @@ with app.app_context(). See the documentation for more information.
 2026-01-09 11:11:35,303 - INFO - config_checker.py:check_llm_connectivity:63 - LLM 可以连接成功。
 2026-01-09 11:11:35,304 - INFO - config_checker.py:check_config:73 - 配置项检查完成。
 2026-01-09 11:11:35,308 - INFO - api.py:setup_scheduler:98 - Scheduler started successfully.
+2026-02-05 18:08:40,190 - INFO - manager.py:_load_config:27 - 配置加载成功

@@ -19,13 +19,21 @@ class ReportService:
         """获取Git认证信息"""
         credentials = {
             'access_token': os.environ.get(f'{self.git_service_type.upper()}_ACCESS_TOKEN'),
-            'owner': os.environ.get(f'{self.git_service_type.upper()}_REPO_OWNER', 'zhangz')
+            'owner': os.environ.get(f'{self.git_service_type.upper()}_REPO_OWNER')
         }
 
         # 添加API URL配置
         api_url_key = f'{self.git_service_type.upper()}_API_URL'
         if os.environ.get(api_url_key):
             credentials['api_url'] = os.environ.get(api_url_key)
+        else:
+            # 从基础URL构建API URL
+            if self.git_service_type == 'gitea' and os.environ.get('GITEA_URL'):
+                credentials['api_url'] = f"{os.environ.get('GITEA_URL')}/api/v1"
+            elif self.git_service_type == 'github' and os.environ.get('GITHUB_URL'):
+                credentials['api_url'] = f"{os.environ.get('GITHUB_URL')}/api/v3"
+            elif self.git_service_type == 'gitlab' and os.environ.get('GITLAB_URL'):
+                credentials['api_url'] = f"{os.environ.get('GITLAB_URL')}/api/v4"
 
         return credentials
 
