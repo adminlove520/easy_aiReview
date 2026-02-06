@@ -37,11 +37,24 @@ file_handler = RotatingFileHandler(
     encoding='utf-8',
     delay=False
 )
-file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s'))
+# 自定义Formatter，使用本地时区（UTC+8）
+class LocalTimeFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        import datetime
+        import time
+        # 强制使用UTC+8时区
+        utc_time = datetime.datetime.utcfromtimestamp(record.created)
+        local_time = utc_time + datetime.timedelta(hours=8)
+        if datefmt:
+            return local_time.strftime(datefmt)
+        else:
+            return local_time.strftime('%Y-%m-%d %H:%M:%S,%f')[:-3]
+
+file_handler.setFormatter(LocalTimeFormatter('%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s'))
 file_handler.setLevel(LOG_LEVEL)
 
 console_handler = logging.StreamHandler()
-console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s'))
+console_handler.setFormatter(LocalTimeFormatter('%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s:%(lineno)d - %(message)s'))
 console_handler.setLevel(LOG_LEVEL)
 
 

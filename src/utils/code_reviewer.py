@@ -44,8 +44,7 @@ class BaseReviewer(abc.ABC):
     def call_llm(self, messages: List[Dict[str, Any]]) -> str:
         """调用 LLM 进行代码审核"""
         logger.info(f"向 AI 发送代码 Review 请求, messages: {messages}")
-        # 调用时明确关闭thinking返回，避免推送钉钉时显示推理过程
-        review_result = self.client.completions(messages=messages, include_reasoning=False)
+        review_result = self.client.completions(messages=messages)
         logger.info(f"收到 AI 返回结果: {review_result}")
         return review_result
 
@@ -276,19 +275,16 @@ class CodeReviewer(BaseReviewer):
         
         return "\n".join(diff_content)
 
-    def review_and_strip_code(self, changes_text: str, commits_text: str = "", changes_data: list = None) -> str:
+    def review_and_strip_code(self, changes_text: str, commits_text: str = "", changes_data: list = None, review_time: str = None) -> str:
         """
         Review判断changes_text超出取前REVIEW_MAX_TOKENS个token，超出则截断changes_text，
         调用review_code方法，返回review_result，如果review_result是markdown格式，则去掉头尾的```
         :param changes_text: 可以是字符串或列表格式的changes
         :param commits_text:
         :param changes_data: 原始的changes数据，用于语言检测
+        :param review_time: 审查时间，来自webhook的metadata
         :return:
         """
-        # 生成当前的审查时间
-        import datetime
-        current_time = datetime.datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')
-        
         # 保存原始的changes数据用于语言检测
         original_changes_data = changes_data
         
@@ -303,6 +299,15 @@ class CodeReviewer(BaseReviewer):
         if not changes_text:
             logger.info("代码为空, diffs_text = %", str(changes_text))
             return "代码为空"
+
+        # 生成当前时间作为默认值
+        import datetime
+        if not review_time:
+            # 强制使用UTC+8时区
+            utc_now = datetime.datetime.utcnow()
+            local_now = utc_now + datetime.timedelta(hours=8)
+            review_time = local_now.strftime('%Y年%m月%d日 %H:%M:%S')
+            logger.info(f"审查时间未提供，使用当前时间: {review_time}")
 
         # 在截断之前先进行语言检测，确保能正确识别文件类型
         detected_language = self._detect_language_from_diff(changes_text)
@@ -337,7 +342,50 @@ class CodeReviewer(BaseReviewer):
 
         # 尝试审查代码，如果失败则使用降级策略
         try:
-            review_result = self.review_code(changes_text, commits_text, final_language, original_changes_data, current_time).strip()
+            review_result = self.review_code(changes_text, commits_text, final_language, original_changes_data, review_time).strip()
+            # 过滤各种格式的thinking标签
+            review_result = review_result.replace('<thinking>', '').replace('</thinking>', '')
+            review_result = review_result.replace('<think>', '').replace('</think>', '')
+            review_result = review_result.replace('<thinking />', '')
+            review_result = review_result.replace('<think />', '')
+            
+            # 过滤纯文本形式的思考内容
+            # 查找常见的思考开头模式
+            thinking_patterns = [
+                '让我按照要求的格式提供详细的',
+                '审查要点：',
+                '由于代码非常简单，我需要：',
+                '让我分析变更的内容',
+                '让我按照要求的格式编写审查报告',
+                '让我分析一下这段代码',
+                '我来分析一下这个变更',
+                '让我仔细分析这段代码',
+                '我需要分析这个变更的合理性',
+                '让我评估这个变更的影响',
+                '现在我将按照要求的格式提供审查报告',
+                '让我开始分析这个代码变更',
+                '我将按照要求的格式提供详细的审查报告',
+                '首先，我需要分析变更的内容',
+                '让我分析一下这个变量重命名变更',
+                '现在我将分析这个变更的合理性和影响',
+                '让我按照审查要点进行分析',
+                '我将按照要求的格式编写详细的审查报告'
+            ]
+            
+            # 查找第一个真正的审查内容开始位置
+            # 通常审查报告以标题开始，如"# Vue3代码审查报告"或类似格式
+            import re
+            report_start_match = re.search(r'^\s*#\s+[\u4e00-\u9fa5\w]+审查报告', review_result, re.MULTILINE)
+            if report_start_match:
+                # 从报告标题开始截取
+                review_result = review_result[report_start_match.start():].strip()
+            elif any(pattern in review_result for pattern in thinking_patterns):
+                # 如果找到思考模式，尝试找到思考内容的结束位置
+                # 查找第一个可能的报告标题或列表开始
+                content_start_match = re.search(r'^\s*[#\d\*\-]+\s+', review_result, re.MULTILINE)
+                if content_start_match:
+                    review_result = review_result[content_start_match.start():].strip()
+            
             if review_result.startswith("```markdown") and review_result.endswith("```"):
                 return review_result[11:-3].strip()
             return review_result
@@ -346,14 +394,14 @@ class CodeReviewer(BaseReviewer):
             # 检查是否是上下文长度相关的错误
             if any(keyword in error_msg for keyword in ['context_length', 'context length', 'too many tokens', 'exceed', 'maximum', 'limit']):
                 logger.warning(f"代码审查失败（上下文超限），尝试降级策略：{e}")
-                return self._fallback_review(original_changes_data, commits_text, current_time, final_language)
+                return self._fallback_review(original_changes_data, commits_text, review_time, final_language)
             else:
                 # 其他错误，重新抛出
                 raise
 
     def review_code(self, diffs_text: str, commits_text: str = "", pre_detected_language: str = None, changes_data: list = None, review_time: str = None) -> str:
         """Review 代码并返回结果"""
-        # review_time 在 review_and_strip_code 中已生成并传递过来，此处直接使用
+        # review_time 来自webhook的metadata，通过review_and_strip_code方法传递过来，此处直接使用
         
         # 智能选择提示词
         if pre_detected_language and pre_detected_language != 'default':
@@ -371,7 +419,8 @@ class CodeReviewer(BaseReviewer):
                 detected_lang = self._detect_language_from_changes(changes_data)
                 logger.info(f"从changes数据中检测到的语言: {detected_lang}")
         
-        prompt_key = self.language_prompts.get(detected_lang, 'vue3_review_prompt')
+        # 使用_get_appropriate_prompt方法获取正确的提示词，确保Vue文件使用Vue3模板
+        prompt_key = self._get_appropriate_prompt(diffs_text)
         style = os.getenv("REVIEW_STYLE", "professional")
         
         logger.info(f"检测到的语言对应的提示词: {prompt_key}")
@@ -495,7 +544,8 @@ class CodeReviewer(BaseReviewer):
         """
         # 加载简化版提示词
         style = os.getenv("REVIEW_STYLE", "professional")
-        prompt_key = self.language_prompts.get(language, 'vue3_review_prompt') if language else 'code_review_prompt'
+        # 使用_get_appropriate_prompt方法获取正确的提示词，确保Vue文件使用Vue3模板
+        prompt_key = self._get_appropriate_prompt(diffs_text)
         
         try:
             prompts = self._load_language_specific_prompts(prompt_key, style)
@@ -506,7 +556,7 @@ class CodeReviewer(BaseReviewer):
         prompt_vars = {
             'diffs_text': diffs_text,
             'commits_text': commits_text,
-            'review_time': review_time
+            'review_time': review_time or '未知时间'
         }
         
         messages = [
@@ -518,6 +568,49 @@ class CodeReviewer(BaseReviewer):
         ]
         
         result = self.call_llm(messages)
+        # 过滤各种格式的thinking标签
+        result = result.replace('<thinking>', '').replace('</thinking>', '')
+        result = result.replace('<think>', '').replace('</think>', '')
+        result = result.replace('<thinking />', '')
+        result = result.replace('<think />', '')
+        
+        # 过滤纯文本形式的思考内容
+        # 查找常见的思考开头模式
+        thinking_patterns = [
+            '让我按照要求的格式提供详细的',
+            '审查要点：',
+            '由于代码非常简单，我需要：',
+            '让我分析变更的内容',
+            '让我按照要求的格式编写审查报告',
+            '让我分析一下这段代码',
+            '我来分析一下这个变更',
+            '让我仔细分析这段代码',
+            '我需要分析这个变更的合理性',
+            '让我评估这个变更的影响',
+            '现在我将按照要求的格式提供审查报告',
+            '让我开始分析这个代码变更',
+            '我将按照要求的格式提供详细的审查报告',
+            '首先，我需要分析变更的内容',
+            '让我分析一下这个变量重命名变更',
+            '现在我将分析这个变更的合理性和影响',
+            '让我按照审查要点进行分析',
+            '我将按照要求的格式编写详细的审查报告'
+        ]
+        
+        # 查找第一个真正的审查内容开始位置
+        # 通常审查报告以标题开始，如"# Vue3代码审查报告"或类似格式
+        import re
+        report_start_match = re.search(r'^\s*#\s+[\u4e00-\u9fa5\w]+审查报告', result, re.MULTILINE)
+        if report_start_match:
+            # 从报告标题开始截取
+            result = result[report_start_match.start():].strip()
+        elif any(pattern in result for pattern in thinking_patterns):
+            # 如果找到思考模式，尝试找到思考内容的结束位置
+            # 查找第一个可能的报告标题或列表开始
+            content_start_match = re.search(r'^\s*[#\d\*\-]+\s+', result, re.MULTILINE)
+            if content_start_match:
+                result = result[content_start_match.start():].strip()
+        
         if result.startswith("```markdown") and result.endswith("```"):
             return result[11:-3].strip()
         return result

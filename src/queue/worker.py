@@ -191,6 +191,7 @@ def handle_github_push_event(webhook_data: dict, github_token: str, github_url: 
         ))
 
     except Exception as e:
+        import traceback
         error_message = f'服务出现未知错误: {str(e)}\n{traceback.format_exc()}'
         notifier.send_notification(content=error_message)
         logger.error('出现未知错误: %s', error_message)

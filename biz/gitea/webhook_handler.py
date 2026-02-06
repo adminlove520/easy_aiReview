@@ -932,7 +932,7 @@ class PushHandler:
             f"**Branch**: {self.branch_name}",
             f"**Commit**: {commit_sha}",
             f"**Author**: {metadata.get('author', 'N/A')}",
-            f"**Review Time**: {metadata.get('review_time', 'N/A')}",
+            f"**Review Time**: {(metadata.get('review_time') or 'N/A')}",
             f"**Files Changed**: {metadata.get('file_count', 0)}",
             f"**Additions**: +{metadata.get('additions', 0)}",
             f"**Deletions**: -{metadata.get('deletions', 0)}",

@@ -15,6 +15,9 @@ def filter_changes(changes: list):
     '''
     # 从环境变量中获取支持的文件扩展名
     supported_extensions = os.getenv('SUPPORTED_EXTENSIONS', '.java,.py,.php').split(',')
+    # 清理扩展名，去除可能的空格
+    supported_extensions = [ext.strip() for ext in supported_extensions]
+    logger.info(f"当前支持的文件扩展名: {supported_extensions}")
 
     filter_deleted_files_changes = [change for change in changes if not change.get("deleted_file")]
 
@@ -714,6 +717,13 @@ class PushHandler:
         if ref.startswith('refs/tags/'):
             logger.info(f"Tag push event detected: {ref}, skipping.")
             return []
+
+        # 首先检查webhook_data中是否直接包含changes字段（用于测试）
+        if 'changes' in self.webhook_data:
+            changes = self.webhook_data.get('changes', [])
+            if changes:
+                logger.info(f"直接从webhook_data获取到{len(changes)}个变更文件")
+                return changes
 
         # 优先尝试compare API获取变更
         before = self.webhook_data.get('before', '')

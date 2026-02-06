@@ -639,11 +639,10 @@ vue3_review_prompt:
     
     审查时间：{review_time}
     
-    审查时间：{review_time}
     
     请直接在审查报告中使用上述审查时间（不要自己生成日期）。
-  
-  java_review_prompt:
+
+java_review_prompt:
   system_prompt: |-
     你是一位资深的Java开发工程师，专注于Java企业级开发最佳实践。请对以下Java代码进行专业审查。
 
