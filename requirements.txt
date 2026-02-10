@@ -1,24 +1,107 @@
+# ============ Web Framework ============
 Flask==3.0.3
-APScheduler==3.10.4
-httpx[socks]
-Jinja2==3.1.4
-lizard==1.17.20
-matplotlib==3.10.1
-openai==1.59.3
-pandas==2.2.3
-pathspec==0.12.1
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+sse-starlette>=1.8.2
+
+# ============ Database ============
 PyMySQL==1.1.1
-python-gitlab==5.6.0
+sqlalchemy>=2.0.0
+asyncpg>=0.29.0
+alembic>=1.13.0
+greenlet>=3.0.0
+redis>=5.0.0
+
+# ============ Data Validation ============
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+email-validator>=2.1.0
+
+# ============ Authentication ============
+passlib[bcrypt]>=1.7.4
+python-jose[cryptography]>=3.3.0
+python-multipart>=0.0.6
+bcrypt>=4.0.0,<5.0.0
+
+# ============ HTTP Client ============
+httpx[socks]>=0.25.0
 requests==2.32.3
-spark-ai-python==0.4.5
-streamlit==1.42.2
+
+# ============ LLM Integration ============
+openai==1.59.3
+#litellm>=1.0.0
 tiktoken==0.9.0
-rq==2.1.0
 dashscope
+
+# ============ Report Generation ============
+Jinja2==3.1.4
+reportlab>=4.0.0
+weasyprint>=60.0
+
+# ============ Utilities ============
+APScheduler==3.10.4
 PyYAML
 python-dotenv
-pydantic
 typing-extensions
-redis
 blinker
 tqdm
+json-repair>=0.30.0
+aiofiles>=23.2.1
+
+# ============ LangChain & LangGraph ============
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-openai>=0.0.5
+langgraph>=0.0.40
+
+# ============ Vector Database ============
+chromadb>=0.4.22
+faiss-cpu==1.8.0
+
+# ============ Embedding Models ============
+cohere==5.5.1
+huggingface-hub==0.24.6
+
+# ============ Code Analysis ============
+lizard==1.17.20
+pygments>=2.17.0
+tree-sitter>=0.25.2
+tree-sitter-languages>=1.10.0
+
+# ============ Docker Sandbox ============
+docker>=7.0.0
+
+# ============ Security Tools ============
+bandit>=1.7.0
+safety>=2.3.0
+pip-audit>=2.6.0
+
+# ============ Kunlun-M Dependencies ============
+pyjsparser>=2.7.1
+phply>=1.2.6
+esprima>=4.0.1
+jsbeautifier>=1.14.0
+colorlog>=6.0.0
+portalocker>=2.0.0
+prettytable>=3.0.0
+rarfile>=4.0
+beautifulsoup4>=4.12.0
+django>=4.2.0
+
+# ============ Data Analysis ============
+pandas==2.2.3
+matplotlib==3.10.1
+
+# ============ Task Queue ============
+rq==2.1.0
+
+# ============ Git Integration ============
+python-gitlab==5.6.0
+
+# ============ Other ============
+spark-ai-python==0.4.5
+streamlit==1.42.2
+pathspec==0.12.1
+
+# ============ Code Parsing ============
+tree-sitter-language-pack>=0.13.0

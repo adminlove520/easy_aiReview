@@ -11,12 +11,19 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from src.service.review_service import ReviewService
 from src.utils.log import logger
+from src.api.deepaudit_api import deepaudit_api
 
 # 创建 Flask 应用
 # 获取项目根目录
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEB_DIR = os.path.join(BASE_DIR, 'web')
+DEEPAUDIT_DIR = os.path.join(WEB_DIR, 'deepaudit', 'dist')
 ui_app = Flask(__name__, static_folder=WEB_DIR, static_url_path='')
+
+
+
+# 注册 DeepAudit API 蓝图
+ui_app.register_blueprint(deepaudit_api, url_prefix='/api/v1')
 
 # API 路由
 @ui_app.route('/api/review/logs', methods=['GET'])
@@ -207,6 +214,20 @@ def get_filter_options():
         logger.error(f"Failed to get filter options: {e}")
         return jsonify({'error': str(e)}), 500
 
+
+# DeepAudit 路由
+@ui_app.route('/deepaudit')
+def deepaudit_index():
+    """提供DeepAudit前端页面"""
+    return send_from_directory(DEEPAUDIT_DIR, 'index.html')
+
+@ui_app.route('/deepaudit/<path:path>')
+def serve_deepaudit_static(path):
+    """提供DeepAudit静态文件"""
+    # 确保路径安全
+    if '..' in path or path.startswith('/'):
+        return None
+    return send_from_directory(DEEPAUDIT_DIR, path)
 
 # 前端路由 - 必须在 API 路由之后定义，避免冲突
 @ui_app.route('/')
